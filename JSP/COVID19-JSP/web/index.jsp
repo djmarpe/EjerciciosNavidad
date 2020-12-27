@@ -12,6 +12,6 @@
         <title>Index</title>
     </head>
     <body>
-        <h1>Página principal</h1>
+        <a href="Vistas/Vista_Login.jsp">Iniciar sesion</a>
     </body>
 </html>
