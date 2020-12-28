@@ -16,7 +16,7 @@ public class ConexionEstatica {
     private static java.sql.Statement Sentencia_SQL;
     //Atributo que nos permite ejecutar una sentencia SQL
     private static java.sql.ResultSet Conj_Registros;
-
+    
     public static void nueva() {
         try {
             //Cargar el driver/controlador
@@ -47,7 +47,7 @@ public class ConexionEstatica {
             System.err.println("Exception: " + e.getMessage());
         }
     }
-
+    
     public static void cerrarBD() {
         try {
             // resultado.close();
@@ -57,13 +57,13 @@ public class ConexionEstatica {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error de Desconexion", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     public static boolean existeUsuario(String correo, String contra) {
         boolean existe = false;
         nueva();
-
+        
         String sentencia = "SELECT * FROM " + Constantes.tablaUsuario + " WHERE correo = '" + correo + "' AND contra = '" + contra + "'";
-
+        
         try {
             Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
             if (Conj_Registros.next()) {
@@ -71,17 +71,17 @@ public class ConexionEstatica {
             }
         } catch (SQLException ex) {
         }
-
+        
         cerrarBD();
         return existe;
     }
-
+    
     public static Persona getPersona(String correo, String contra) {
         Persona aux = new Persona();
         nueva();
-
+        
         String sentencia = "Select Usuario.Nombre, Usuario.Apellidos, Usuario.DNI, Usuario.Correo, Usuario.Contra, Usuario.Activado, Rol.Rol from Usuario, Rol, AsignacionRol where Usuario.Correo = '" + correo + "' and Usuario.Contra = '" + contra + "' and AsignacionRol.DNI = Usuario.DNI and AsignacionRol.idRol=Rol.idRol;";
-
+        
         try {
             Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
             while (Conj_Registros.next()) {
@@ -95,17 +95,17 @@ public class ConexionEstatica {
             }
         } catch (SQLException ex) {
         }
-
+        
         cerrarBD();
         return aux;
     }
-
+    
     public static LinkedList getPersonas() {
         LinkedList aux = new LinkedList();
         nueva();
-
+        
         String sentencia = "Select Usuario.Nombre, Usuario.Apellidos, Usuario.DNI, Usuario.Correo, Usuario.Activado, Rol.Rol from Usuario, Rol, AsignacionRol where AsignacionRol.DNI = Usuario.DNI and AsignacionRol.idRol=Rol.idRol;";
-
+        
         try {
             Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
             while (Conj_Registros.next()) {
@@ -120,18 +120,18 @@ public class ConexionEstatica {
             }
         } catch (SQLException ex) {
         }
-
+        
         cerrarBD();
         return aux;
     }
-
+    
     public static boolean editarUsuario(Persona aux) {
         boolean editado = false;
         nueva();
 
         //Editamos al usuario de la tabla de Usuario
         String sentencia1 = "UPDATE Usuario SET Correo = '" + aux.getCorreo() + "', Activado = " + aux.getActivado() + " WHERE DNI = '" + aux.getDni() + "'";
-
+        
         try {
             Sentencia_SQL.executeUpdate(sentencia1);
             //Obtenemos el rol nuevo del usuario
@@ -145,7 +145,7 @@ public class ConexionEstatica {
                 Sentencia_SQL.executeUpdate(sentencia3);
                 editado = true;
             }
-
+            
             if (roles.get(0).equals("Administrador / Gestor")) {
                 //Borramos el anterior rol de la BBDD
                 String sentencia2 = "DELETE FROM AsignacionRol WHERE dni = '" + aux.getDni() + "'";
@@ -157,18 +157,18 @@ public class ConexionEstatica {
             }
         } catch (SQLException ex) {
         }
-
+        
         cerrarBD();
         return editado;
     }
-
+    
     public static boolean borrarUsuario(String dni) {
         boolean deleteado = false;
         nueva();
 
         //Borramos al usuario de la tabla de Usuario
         String sentencia1 = "DELETE FROM Usuario WHERE DNI = '" + dni + "'";
-
+        
         try {
             Sentencia_SQL.executeUpdate(sentencia1);
             //Borramos el usuario de AsignacionRol
@@ -177,18 +177,18 @@ public class ConexionEstatica {
             deleteado = true;
         } catch (SQLException ex) {
         }
-
+        
         cerrarBD();
         return deleteado;
     }
-
+    
     public static boolean addUsuario(Persona aux) {
         boolean add = false;
         int idRol;
         nueva();
-
+        
         String sentencia1 = "INSERT INTO Usuario VALUES('" + aux.getNombre() + "','" + aux.getApellidos() + "','" + aux.getDni() + "','" + aux.getCorreo() + "','" + aux.getContra() + "'," + aux.getActivado() + ")";
-
+        
         try {
             Sentencia_SQL.executeUpdate(sentencia1);
             LinkedList rol = aux.getRoles();
@@ -204,6 +204,77 @@ public class ConexionEstatica {
         }
         cerrarBD();
         return add;
+    }
+    
+    public static LinkedList getSemanas() {
+        LinkedList aux = new LinkedList();
+        nueva();
+        
+        String sentencia = "SELECT * FROM Semana";
+        
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                aux.add(Conj_Registros.getString("Semana"));
+            }
+        } catch (SQLException ex) {
+        }
+        
+        cerrarBD();
+        return aux;
+    }
+    
+    public static LinkedList getRegiones(String semana) {
+        LinkedList aux = new LinkedList();
+        int idSemana = 0;
+        int idRegion = 0;
+        String nombreRegion = "";
+        nueva();
+        
+        try {
+            Region r = null;
+            //Obtenemos el idSemana según la semana que vayamos a filtrar
+            String sentencia1 = "SELECT idSemana FROM Semana WHERE Semana = '" + semana + "'";
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia1);
+            if (Conj_Registros.next()) {
+                idSemana = Conj_Registros.getInt("idSemana");
+                
+                String sentencia2 = "SELECT * FROM InfeccionSemanal WHERE idSemana = " + idSemana;
+                Conj_Registros = Sentencia_SQL.executeQuery(sentencia2);
+                while (Conj_Registros.next()) {
+                    r = new Region();
+                    r.setSemana(semana);
+                    r.setNumInfectados(Conj_Registros.getInt("NumInfectados"));
+                    r.setNumFallecidos(Conj_Registros.getInt("NumFallecidos"));
+                    r.setNumAltas(Conj_Registros.getInt("NumAltas"));
+                    r.setRegion(String.valueOf(Conj_Registros.getInt("idRegion")));
+                    aux.add(r);
+                }
+                
+            }
+        } catch (SQLException ex) {
+        }
+        cerrarBD();
+        return aux;
+    }
+    
+    public static LinkedList getNombreRegiones(LinkedList regiones) {
+        nueva();
+        
+        for (int i = 0; i < regiones.size(); i++) {
+            Region r = (Region) regiones.get(i);
+            String sentencia = "SELECT Nombre FROM Region WHERE idRegion = " + r.getRegion();
+            try {
+                Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+                if (Conj_Registros.next()) {
+                    r.setRegion(Conj_Registros.getString("Nombre"));
+                }
+            } catch (SQLException ex) {
+            }
+        }
+        
+        cerrarBD();
+        return regiones;
     }
 
 //
@@ -511,4 +582,18 @@ public class ConexionEstatica {
 //        cerrarBD();
 //        return loes;
 //    }
+    private static String obtenerNombreRegion(int idRegion) {
+        nueva();
+        String nombreRegion = "";
+        try {
+            String sentencia = "SELECT Nombre FROM Region WHERE idRegion = " + idRegion;
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            if (Conj_Registros.next()) {
+                nombreRegion = Conj_Registros.getString("Nombre");
+            }
+        } catch (SQLException ex) {
+        }
+        cerrarBD();
+        return nombreRegion;
+    }
 }

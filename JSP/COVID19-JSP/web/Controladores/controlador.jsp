@@ -12,7 +12,7 @@
     if (request.getParameter("iniciarSesion") != null) {
         String correo = request.getParameter("correo");
         String contra = request.getParameter("contra");
-        
+
         if (ConexionEstatica.existeUsuario(correo, contra)) {
             Persona aux = ConexionEstatica.getPersona(correo, contra);
             if (aux.getActivado() == 0) {
@@ -22,6 +22,8 @@
                 session.setAttribute("usuarioLogin", aux);
                 LinkedList roles = aux.getRoles();
                 if (roles.get(0).equals("Gestor")) {
+                    LinkedList semanasDisponibles = ConexionEstatica.getSemanas();
+                    session.setAttribute("semanasDisponibles", semanasDisponibles);
                     response.sendRedirect("../Vistas/Vista_Gestor.jsp");
                 }
                 if (roles.get(0).equals("Administrador / Gestor")) {
@@ -30,12 +32,12 @@
                     response.sendRedirect("../Vistas/Vista_CRUD.jsp");
                 }
             }
-            
+
         } else {
             session.setAttribute("mensajeLogin", "Credenciales incorrectas");
             response.sendRedirect("../Vistas/Vista_Login.jsp");
         }
-        
+
     }
 
     //**************************************************************************
@@ -100,7 +102,7 @@
             } else if (request.getParameter("new_rol").equals("Administrador / Gestor")) {
                 aux.addRol("Administrador / Gestor");
             }
-            
+
             if (ConexionEstatica.addUsuario(aux)) {
                 LinkedList listaPersonas = ConexionEstatica.getPersonas();
                 session.setAttribute("listaPersonas", listaPersonas);
@@ -108,12 +110,21 @@
             }
         }
     }
-    
+
+    if (request.getParameter("semanaFiltrar") != null) {
+        String semana = request.getParameter("semanaFiltrar");
+        session.setAttribute("semana", semana);
+        LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
+        LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
+        session.setAttribute("regionesDisponibles", regiones);
+        response.sendRedirect("../Vistas/Vista_Gestor.jsp");
+    }
+
     if (request.getParameter("cerrarSesion") != null) {
         session.removeAttribute("usuarioLogin");
         session.removeAttribute("listaPersonas");
         session.setAttribute("mensajeLogin", "Sesión cerrada correctamente");
         response.sendRedirect("../Vistas/Vista_Login.jsp");
     }
-    
+
 %>
