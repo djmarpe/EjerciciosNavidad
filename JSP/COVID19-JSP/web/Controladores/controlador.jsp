@@ -4,6 +4,7 @@
     Author     : alejandro
 --%>
 
+<%@page import="Modelo.Region"%>
 <%@page import="java.util.LinkedList"%>
 <%@page import="Modelo.Persona"%>
 <%@page import="Modelo.ConexionEstatica"%>
@@ -111,15 +112,88 @@
         }
     }
 
+    //----------------------------------------------------------------------
+    //--------------- Si filtramos por alguna semana -----------------------
+    //----------------------------------------------------------------------
     if (request.getParameter("semanaFiltrar") != null) {
         String semana = request.getParameter("semanaFiltrar");
         session.setAttribute("semana", semana);
         LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
         LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
-        session.setAttribute("regionesDisponibles", regiones);
+        int idSemana = ConexionEstatica.getIdSemana((String) session.getAttribute("semana"));
+        LinkedList regionesDisponibles = ConexionEstatica.getRegionesDisponibles(idSemana);
+        session.setAttribute("regionesDisponibles", regionesDisponibles);
+        session.setAttribute("regionesPorSemanas", regiones);
         response.sendRedirect("../Vistas/Vista_Gestor.jsp");
     }
 
+    if (request.getParameter("bt_Gestor") != null) {
+        String botonPulsado = request.getParameter("bt_Gestor");
+        String semana = (String) session.getAttribute("semana");
+        if (botonPulsado.equals("Editar")) {
+
+            Region r = new Region();
+            //Obtenemos los id de Semana y de Region
+            int idSemana = ConexionEstatica.getIdSemana((String) session.getAttribute("semana"));
+            int idRegion = ConexionEstatica.getIdRegion(request.getParameter("region"));
+
+            r.setSemana(String.valueOf(idSemana));
+            r.setRegion(String.valueOf(idRegion));
+            r.setNumInfectados(Integer.parseInt(request.getParameter("numInfectados")));
+            r.setNumFallecidos(Integer.parseInt(request.getParameter("numFallecidos")));
+            r.setNumAltas(Integer.parseInt(request.getParameter("numAltas")));
+            if (ConexionEstatica.editarRegion(r)) {
+                LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
+                LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
+                session.setAttribute("regionesPorSemanas", regiones);
+                LinkedList regionesDisponibles = ConexionEstatica.getRegionesDisponibles(idSemana);
+                session.setAttribute("regionesDisponibles", regionesDisponibles);
+                response.sendRedirect("../Vistas/Vista_Gestor.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Borrar")) {
+            //Obtenemos los id de Semana y de Region
+            int idSemana = ConexionEstatica.getIdSemana((String) session.getAttribute("semana"));
+            int idRegion = ConexionEstatica.getIdRegion(request.getParameter("region"));
+
+            if (ConexionEstatica.borrarRegionDeSemana(idSemana, idRegion)) {
+                LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
+                LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
+                session.setAttribute("regionesPorSemanas", regiones);
+                LinkedList regionesDisponibles = ConexionEstatica.getRegionesDisponibles(idSemana);
+                session.setAttribute("regionesDisponibles", regionesDisponibles);
+                response.sendRedirect("../Vistas/Vista_Gestor.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Introducir region")) {
+            //Obtenemos los id de Semana y de Region
+            int idSemana = ConexionEstatica.getIdSemana((String) session.getAttribute("semana"));
+            int idRegion = ConexionEstatica.getIdRegion(request.getParameter("regionDisponible_region"));
+
+            Region r = new Region();
+            r.setRegion(String.valueOf(idRegion));
+            r.setSemana(String.valueOf(idSemana));
+            r.setNumInfectados(Integer.parseInt(request.getParameter("numInfecciones_region")));
+            r.setNumFallecidos(Integer.parseInt(request.getParameter("numFallecidos_region")));
+            r.setNumAltas(Integer.parseInt(request.getParameter("numAltas_region")));
+            if (ConexionEstatica.addRegionASemana(r)) {
+                LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
+                LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
+                session.setAttribute("regionesPorSemanas", regiones);
+                LinkedList regionesDisponibles = ConexionEstatica.getRegionesDisponibles(idSemana);
+
+                session.setAttribute("regionesDisponibles", regionesDisponibles);
+                response.sendRedirect("../Vistas/Vista_Gestor.jsp");
+            }
+        }
+
+    }
+
+    //----------------------------------------------------------------------
+    //--------------- Si pulsamos cerrar sesion ----------------------------
+    //----------------------------------------------------------------------
     if (request.getParameter("cerrarSesion") != null) {
         session.removeAttribute("usuarioLogin");
         session.removeAttribute("listaPersonas");
