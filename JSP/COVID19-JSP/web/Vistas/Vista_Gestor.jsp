@@ -17,17 +17,33 @@
     <body>
         <%
             Persona usuarioLogin = (Persona) session.getAttribute("usuarioLogin");
-            
+
+            LinkedList cambioRol = usuarioLogin.getRoles();
+
             LinkedList semanasDisponibles = (LinkedList) session.getAttribute("semanasDisponibles");
-            
+
             LinkedList regionesSemanas = (LinkedList) session.getAttribute("regionesPorSemanas");
-            
+
             LinkedList regionesDisponibles = (LinkedList) session.getAttribute("regionesDisponibles");
-            
+
             String semana = (String) session.getAttribute("semana");
         %>
 
         <h1>Bienvenido: <%= usuarioLogin.getNombre() + " " + usuarioLogin.getApellidos()%></h1>
+
+        <%
+            if (cambioRol.get(0).equals("Administrador / Gestor")) {
+        %>
+        <form action="../Controladores/controlador.jsp" name="form_cambiarRol" method="POST">
+            <input type="submit" name="bt_cambioRol" value="Ir a Admin">
+        </form>
+        <%
+            }
+        %>
+
+        <form action="../Controladores/controlador.jsp" name="form_cerrarSesion" method="POST">
+            <input type="submit" name="cerrarSesion" value="Cerrar Sesion">
+        </form>
 
         <%
             if (semanasDisponibles.size() > 0) {
@@ -36,7 +52,7 @@
             Semana a buscar:
             <select name="semanaFiltrar"  onclick="this.form.submit();">
                 <option disabled selected>Seleccione una semana</option>
-                <%            
+                <%
                     for (int i = 0; i < semanasDisponibles.size(); i++) {
                 %>
                 <option name="semana"><%= semanasDisponibles.get(i)%></option>
@@ -47,7 +63,7 @@
         </form>
         <%
             }
-            
+
             if (semana != null && regionesSemanas != null) {
         %>
 
@@ -89,9 +105,9 @@
         } else {
         %>
         <h3>No hay datos</h3>
-        <%        
+        <%
             }
-            
+
             if (regionesDisponibles instanceof LinkedList) {
         %>
         <form action="../Controladores/controlador.jsp" name="form_addRegionASemana" method="POST">
@@ -117,7 +133,7 @@
                 <tr>
                     <td>
                         <select name="regionDisponible_region">
-                            <%                        
+                            <%
                                 for (int i = 0; i < regionesDisponibles.size(); i++) {
                             %>
                             <option name="regionDisponibleOption_region"><%= regionesDisponibles.get(i)%></option>

@@ -379,6 +379,146 @@ public class ConexionEstatica {
         return add;
     }
 
+    public static LinkedList getTodasRegiones() {
+        LinkedList aux = new LinkedList();
+        RegionAux r = null;
+        nueva();
+
+        String sentencia = "SELECT * FROM Region";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                r = new RegionAux();
+                r.setIdRegion(Conj_Registros.getInt("idRegion"));
+                r.setNombre(Conj_Registros.getString("Nombre"));
+                aux.add(r);
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
+    public static boolean editarNombreRegion(RegionAux r) {
+        boolean editado = false;
+        nueva();
+
+        String sentencia = "UPDATE Region SET Nombre = '" + r.getNombre() + "' WHERE idRegion = " + r.getIdRegion();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            editado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return editado;
+    }
+
+    public static boolean editarNombreSemana(SemanaAux s) {
+        boolean editado = false;
+        nueva();
+
+        String sentencia = "UPDATE Semana SET Semana = '" + s.getSemana() + "' WHERE idSemana = " + s.getIdSemana();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            editado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return editado;
+    }
+
+    public static boolean borrarNombreRegion(RegionAux r) {
+        boolean deleteado = false;
+        nueva();
+
+        String sentencia = "DELETE FROM Region WHERE idRegion  =  " + r.getIdRegion();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            deleteado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return deleteado;
+    }
+
+    public static boolean borrarNombreSemana(SemanaAux s) {
+        boolean deleteado = false;
+        nueva();
+
+        String sentencia = "DELETE FROM Semana WHERE idSemana  =  " + s.getIdSemana();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            deleteado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return deleteado;
+    }
+
+    public static boolean addNombreRegion(RegionAux r) {
+        boolean add = false;
+        nueva();
+
+        String sentencia = "INSERT INTO Region VALUES(NULL,'" + r.getNombre() + "')";
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            add = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return add;
+    }
+    
+    public static boolean addNombreSemana(SemanaAux s) {
+        boolean add = false;
+        nueva();
+
+        String sentencia = "INSERT INTO Semana VALUES(NULL,'" + s.getSemana()+ "')";
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            add = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return add;
+    }
+
+    public static LinkedList getTodasSemanas() {
+        LinkedList aux = new LinkedList();
+        SemanaAux s = null;
+        nueva();
+
+        String sentencia = "SELECT * FROM Semana";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                s = new SemanaAux();
+                s.setIdSemana(Conj_Registros.getInt("idSemana"));
+                s.setSemana(Conj_Registros.getString("Semana"));
+                aux.add(s);
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
 //
 //    public static boolean enviarMensaje(String emisor, String receptor, String asunto, String cuerpo) {
 //        nueva();

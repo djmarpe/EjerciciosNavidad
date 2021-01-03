@@ -4,6 +4,8 @@
     Author     : alejandro
 --%>
 
+<%@page import="Modelo.SemanaAux"%>
+<%@page import="Modelo.RegionAux"%>
 <%@page import="Modelo.Region"%>
 <%@page import="java.util.LinkedList"%>
 <%@page import="Modelo.Persona"%>
@@ -127,6 +129,15 @@
         response.sendRedirect("../Vistas/Vista_Gestor.jsp");
     }
 
+    if (request.getParameter("semanaFiltrarIndex") != null) {
+        String semana = request.getParameter("semanaFiltrarIndex");
+        session.setAttribute("semana", semana);
+        LinkedList regionesAux = ConexionEstatica.getRegiones(semana);
+        LinkedList regiones = ConexionEstatica.getNombreRegiones(regionesAux);
+        session.setAttribute("regionesPorSemanas", regiones);
+        response.sendRedirect("../index.jsp");
+    }
+
     if (request.getParameter("bt_Gestor") != null) {
         String botonPulsado = request.getParameter("bt_Gestor");
         String semana = (String) session.getAttribute("semana");
@@ -191,6 +202,96 @@
 
     }
 
+    if (request.getParameter("verRegiones") != null) {
+        LinkedList todasRegiones = ConexionEstatica.getTodasRegiones();
+        session.setAttribute("todasRegiones", todasRegiones);
+        response.sendRedirect("../Vistas/Vista_Region.jsp");
+    }
+
+    //**************************************************************************
+    //********************** Ventana regiones **********************************
+    //**************************************************************************
+    if (request.getParameter("bt_Region") != null) {
+        String botonPulsado = request.getParameter("bt_Region");
+        RegionAux r = new RegionAux();
+        if (request.getParameter("idRegion") != null) {
+            int idRegion = Integer.parseInt(request.getParameter("idRegion"));
+            r.setIdRegion(idRegion);
+        }
+
+        String region = request.getParameter("region");
+
+        r.setNombre(region);
+
+        if (botonPulsado.equals("Editar")) {
+            if (ConexionEstatica.editarNombreRegion(r)) {
+                LinkedList todasRegiones = ConexionEstatica.getTodasRegiones();
+                session.setAttribute("todasRegiones", todasRegiones);
+                response.sendRedirect("../Vistas/Vista_Region.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Borrar")) {
+            if (ConexionEstatica.borrarNombreRegion(r)) {
+                LinkedList todasRegiones = ConexionEstatica.getTodasRegiones();
+                session.setAttribute("todasRegiones", todasRegiones);
+                response.sendRedirect("../Vistas/Vista_Region.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Crear region")) {
+            r.setNombre(request.getParameter("nuevaRegion"));
+            if (ConexionEstatica.addNombreRegion(r)) {
+                LinkedList todasRegiones = ConexionEstatica.getTodasRegiones();
+                session.setAttribute("todasRegiones", todasRegiones);
+                response.sendRedirect("../Vistas/Vista_Region.jsp");
+            }
+        }
+
+    }
+    
+    //**************************************************************************
+    //********************** Ventana semanas **********************************
+    //**************************************************************************
+    if (request.getParameter("bt_Semana") != null) {
+        String botonPulsado = request.getParameter("bt_Semana");
+        SemanaAux s = new SemanaAux();
+        if (request.getParameter("idSemana") != null) {
+            int idSemana = Integer.parseInt(request.getParameter("idSemana"));
+            s.setIdSemana(idSemana);
+        }
+
+        String semana = request.getParameter("semana");
+
+        s.setSemana(semana);
+
+        if (botonPulsado.equals("Editar")) {
+            if (ConexionEstatica.editarNombreSemana(s)) {
+                LinkedList todasSemanas = ConexionEstatica.getTodasSemanas();
+                session.setAttribute("todasSemanas", todasSemanas);
+                response.sendRedirect("../Vistas/Vista_Semana.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Borrar")) {
+            if (ConexionEstatica.borrarNombreSemana(s)) {
+                LinkedList todasSemanas = ConexionEstatica.getTodasSemanas();
+                session.setAttribute("todasSemanas", todasSemanas);
+                response.sendRedirect("../Vistas/Vista_Semana.jsp");
+            }
+        }
+
+        if (botonPulsado.equals("Crear semana")) {
+            s.setSemana(request.getParameter("nuevaSemana"));
+            if (ConexionEstatica.addNombreSemana(s)) {
+                LinkedList todasSemanas = ConexionEstatica.getTodasSemanas();
+                session.setAttribute("todasSemanas", todasSemanas);
+                response.sendRedirect("../Vistas/Vista_Semana.jsp");
+            }
+        }
+
+    }
+
     //----------------------------------------------------------------------
     //--------------- Si pulsamos cerrar sesion ----------------------------
     //----------------------------------------------------------------------
@@ -198,7 +299,29 @@
         session.removeAttribute("usuarioLogin");
         session.removeAttribute("listaPersonas");
         session.setAttribute("mensajeLogin", "Sesión cerrada correctamente");
-        response.sendRedirect("../Vistas/Vista_Login.jsp");
+        response.sendRedirect("../index.jsp");
+    }
+
+    if (request.getParameter("verSemanas") != null) {
+        LinkedList todasSemanas = ConexionEstatica.getTodasSemanas();
+        session.setAttribute("todasSemanas", todasSemanas);
+        response.sendRedirect("../Vistas/Vista_Semana.jsp");
+    }
+
+    if (request.getParameter("bt_cambioRol") != null) {
+        String ir = request.getParameter("bt_cambioRol");
+
+        if (ir.equals("Ir a Admin")) {
+            LinkedList listaPersonas = ConexionEstatica.getPersonas();
+            session.setAttribute("listaPersonas", listaPersonas);
+            response.sendRedirect("../Vistas/Vista_CRUD.jsp");
+        }
+
+        if (ir.equals("Ir a Gestor")) {
+            LinkedList semanasDisponibles = ConexionEstatica.getSemanas();
+            session.setAttribute("semanasDisponibles", semanasDisponibles);
+            response.sendRedirect("../Vistas/Vista_Gestor.jsp");
+        }
     }
 
 %>
