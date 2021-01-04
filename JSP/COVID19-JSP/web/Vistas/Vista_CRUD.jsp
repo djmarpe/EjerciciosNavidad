@@ -18,14 +18,35 @@
             Persona usuarioLogin = (Persona) session.getAttribute("usuarioLogin");
 
             LinkedList listaPersonas = (LinkedList) session.getAttribute("listaPersonas");
+
+            LinkedList cambioRol = usuarioLogin.getRoles();
         %>
 
         <h1>Bienvenido: <%= usuarioLogin.getNombre() + " " + usuarioLogin.getApellidos()%></h1>
+
+        <%
+            if (cambioRol.get(0).equals("Administrador / Gestor")) {
+        %>
+        <form action="../Controladores/controlador.jsp" name="form_cambiarRol" method="POST">
+            <input type="submit" name="bt_cambioRol" value="Ir a Gestor">
+        </form>
+        <%
+            }
+        %>
+
 
         <form action="../Controladores/controlador.jsp" name="form_cerrarSesion" method="POST">
             <input type="submit" name="cerrarSesion" value="Cerrar Sesion">
         </form>
 
+        <form action="../Controladores/controlador.jsp" name="form_verRegiones" method="POST">
+            <input type="submit" name="verRegiones" value="Ver regiones">
+        </form>
+
+        <form action="../Controladores/controlador.jsp" name="form_verSemanas" method="POST">
+            <input type="submit" name="verSemanas" value="Ver semanas">
+        </form>
+        
         <h4>Crear un nuevo usuario</h4>
         <table>
             <tr>

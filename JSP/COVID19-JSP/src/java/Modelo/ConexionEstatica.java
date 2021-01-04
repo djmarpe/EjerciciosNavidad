@@ -206,6 +206,319 @@ public class ConexionEstatica {
         return add;
     }
 
+    public static LinkedList getSemanas() {
+        LinkedList aux = new LinkedList();
+        nueva();
+
+        String sentencia = "SELECT * FROM Semana";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                aux.add(Conj_Registros.getString("Semana"));
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
+    public static LinkedList getRegiones(String semana) {
+        LinkedList aux = new LinkedList();
+        int idSemana = 0;
+        int idRegion = 0;
+        String nombreRegion = "";
+        nueva();
+
+        try {
+            Region r = null;
+            //Obtenemos el idSemana según la semana que vayamos a filtrar
+            String sentencia1 = "SELECT idSemana FROM Semana WHERE Semana = '" + semana + "'";
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia1);
+            if (Conj_Registros.next()) {
+                idSemana = Conj_Registros.getInt("idSemana");
+
+                String sentencia2 = "SELECT * FROM InfeccionSemanal WHERE idSemana = " + idSemana;
+                Conj_Registros = Sentencia_SQL.executeQuery(sentencia2);
+                while (Conj_Registros.next()) {
+                    r = new Region();
+                    r.setSemana(semana);
+                    r.setNumInfectados(Conj_Registros.getInt("NumInfectados"));
+                    r.setNumFallecidos(Conj_Registros.getInt("NumFallecidos"));
+                    r.setNumAltas(Conj_Registros.getInt("NumAltas"));
+                    r.setRegion(String.valueOf(Conj_Registros.getInt("idRegion")));
+                    aux.add(r);
+                }
+
+            }
+        } catch (SQLException ex) {
+        }
+        cerrarBD();
+        return aux;
+    }
+
+    public static LinkedList getNombreRegiones(LinkedList regiones) {
+        nueva();
+
+        for (int i = 0; i < regiones.size(); i++) {
+            Region r = (Region) regiones.get(i);
+            String sentencia = "SELECT Nombre FROM Region WHERE idRegion = " + r.getRegion();
+            try {
+                Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+                if (Conj_Registros.next()) {
+                    r.setRegion(Conj_Registros.getString("Nombre"));
+                }
+            } catch (SQLException ex) {
+            }
+        }
+
+        cerrarBD();
+        return regiones;
+    }
+
+    public static int getIdSemana(String semana) {
+        int idSemana = 0;
+        nueva();
+
+        String sentencia = "SELECT idSemana FROM Semana WHERE Semana = '" + semana + "'";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            if (Conj_Registros.next()) {
+                idSemana = Conj_Registros.getInt("idSemana");
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return idSemana;
+    }
+
+    public static int getIdRegion(String region) {
+        int idRegion = 0;
+        nueva();
+
+        String sentencia = "SELECT idRegion FROM Region WHERE Nombre = '" + region + "'";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            if (Conj_Registros.next()) {
+                idRegion = Conj_Registros.getInt("idRegion");
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return idRegion;
+    }
+
+    public static boolean editarRegion(Region r) {
+        boolean editado = false;
+        nueva();
+
+        String sentencia = "UPDATE InfeccionSemanal SET NumInfectados = " + r.getNumInfectados() + ", NumFallecidos = " + r.getNumFallecidos() + ", NumAltas = " + r.getNumAltas() + " WHERE idSemana = " + r.getSemana() + " AND idRegion = " + r.getRegion();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            editado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return editado;
+    }
+
+    public static boolean borrarRegionDeSemana(int idSemana, int idRegion) {
+        boolean deleteado = false;
+        nueva();
+
+        String sentencia = "DELETE FROM InfeccionSemanal WHERE idSemana = " + idSemana + " AND idRegion = " + idRegion;
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            deleteado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return deleteado;
+    }
+
+    public static LinkedList getRegionesDisponibles(int idSemana) {
+        LinkedList aux = new LinkedList();
+        nueva();
+
+        String sentencia = "SELECT Nombre FROM Region WHERE idRegion NOT IN (SELECT idRegion FROM InfeccionSemanal WHERE idSemana = " + idSemana + ")";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                aux.add(Conj_Registros.getString("Nombre"));
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
+    public static boolean addRegionASemana(Region r) {
+        boolean add = false;
+        nueva();
+
+        String sentencia = "INSERT INTO InfeccionSemanal VALUES(" + r.getSemana() + "," + r.getRegion() + "," + r.getNumInfectados() + "," + r.getNumFallecidos() + "," + r.getNumAltas() + ")";
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            add = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return add;
+    }
+
+    public static LinkedList getTodasRegiones() {
+        LinkedList aux = new LinkedList();
+        RegionAux r = null;
+        nueva();
+
+        String sentencia = "SELECT * FROM Region";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                r = new RegionAux();
+                r.setIdRegion(Conj_Registros.getInt("idRegion"));
+                r.setNombre(Conj_Registros.getString("Nombre"));
+                aux.add(r);
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
+    public static boolean editarNombreRegion(RegionAux r) {
+        boolean editado = false;
+        nueva();
+
+        String sentencia = "UPDATE Region SET Nombre = '" + r.getNombre() + "' WHERE idRegion = " + r.getIdRegion();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            editado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return editado;
+    }
+
+    public static boolean editarNombreSemana(SemanaAux s) {
+        boolean editado = false;
+        nueva();
+
+        String sentencia = "UPDATE Semana SET Semana = '" + s.getSemana() + "' WHERE idSemana = " + s.getIdSemana();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            editado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return editado;
+    }
+
+    public static boolean borrarNombreRegion(RegionAux r) {
+        boolean deleteado = false;
+        nueva();
+
+        String sentencia = "DELETE FROM Region WHERE idRegion  =  " + r.getIdRegion();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            deleteado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return deleteado;
+    }
+
+    public static boolean borrarNombreSemana(SemanaAux s) {
+        boolean deleteado = false;
+        nueva();
+
+        String sentencia = "DELETE FROM Semana WHERE idSemana  =  " + s.getIdSemana();
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            deleteado = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return deleteado;
+    }
+
+    public static boolean addNombreRegion(RegionAux r) {
+        boolean add = false;
+        nueva();
+
+        String sentencia = "INSERT INTO Region VALUES(NULL,'" + r.getNombre() + "')";
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            add = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return add;
+    }
+    
+    public static boolean addNombreSemana(SemanaAux s) {
+        boolean add = false;
+        nueva();
+
+        String sentencia = "INSERT INTO Semana VALUES(NULL,'" + s.getSemana()+ "')";
+
+        try {
+            Sentencia_SQL.executeUpdate(sentencia);
+            add = true;
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return add;
+    }
+
+    public static LinkedList getTodasSemanas() {
+        LinkedList aux = new LinkedList();
+        SemanaAux s = null;
+        nueva();
+
+        String sentencia = "SELECT * FROM Semana";
+
+        try {
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            while (Conj_Registros.next()) {
+                s = new SemanaAux();
+                s.setIdSemana(Conj_Registros.getInt("idSemana"));
+                s.setSemana(Conj_Registros.getString("Semana"));
+                aux.add(s);
+            }
+        } catch (SQLException ex) {
+        }
+
+        cerrarBD();
+        return aux;
+    }
+
 //
 //    public static boolean enviarMensaje(String emisor, String receptor, String asunto, String cuerpo) {
 //        nueva();
@@ -511,4 +824,18 @@ public class ConexionEstatica {
 //        cerrarBD();
 //        return loes;
 //    }
+    private static String obtenerNombreRegion(int idRegion) {
+        nueva();
+        String nombreRegion = "";
+        try {
+            String sentencia = "SELECT Nombre FROM Region WHERE idRegion = " + idRegion;
+            Conj_Registros = Sentencia_SQL.executeQuery(sentencia);
+            if (Conj_Registros.next()) {
+                nombreRegion = Conj_Registros.getString("Nombre");
+            }
+        } catch (SQLException ex) {
+        }
+        cerrarBD();
+        return nombreRegion;
+    }
 }
