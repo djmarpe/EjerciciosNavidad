@@ -17,8 +17,8 @@ if ($_REQUEST['iniciarSesion'] != null) {
             $_SESSION['usuarioLogin'] = $aux;
             $roles = $aux->getRoles();
             if ($roles[0] == "Gestor") {
-                //$semanasDisponibles = ConexionEstatica::getSemanas();
-                //$_SESSION['semanasDisponibles'] = $semanasDisponibles;
+                $semanasDisponibles = ConexionEstatica::getSemanas();
+                $_SESSION['semanasDisponibles'] = $semanasDisponibles;
                 header('Location: ../Vistas/Vista_Gestor.php');
             }
             if ($roles[0] == "Administrador / Gestor") {
@@ -92,6 +92,20 @@ if ($_REQUEST['bt_admin'] != null) {
         }
     }
 }
+
+
+if ($_REQUEST["semanaFiltrar"] != null) {
+    $semana = $_REQUEST["semanaFiltrar"];
+    $_SESSION['semana'] = $semana;
+    $regionesAux = ConexionEstatica::getRegiones($semana);
+    $regiones = ConexionEstatica::getNombreRegiones($regionesAux);
+    $idSemana = ConexionEstatica::getIdSemana($_SESSION['semana']);
+    $regionesDisponibles = ConexionEstatica::getRegionesDisponibles($idSemana);
+    $_SESSION['regionesDisponibles'] = $regionesDisponibles;
+    $_SESSION['regionesPorSemanas'] = $regiones;
+    header('Location: ../Vistas/Vista_Gestor.php');
+}
+
 
 if ($_REQUEST['cerrarSesion'] != null) {
     $_SESSION["usuarioLogin"] = null;

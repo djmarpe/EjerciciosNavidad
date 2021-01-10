@@ -159,4 +159,96 @@ class ConexionEstatica {
         return $editado;
     }
 
+    public static function getSemanas() {
+        $aux = [];
+        self::abrirConex();
+
+        $sentencia = "SELECT * FROM Semana";
+
+        if ($resultado = mysqli_query(self::$conexion, $sentencia)) {
+            while ($fila = mysqli_fetch_array($resultado)) {
+                $aux[] = $fila["Semana"];
+            }
+        }
+
+        self::cerrarConex();
+        return $aux;
+    }
+
+    public static function getRegiones($semana) {
+        $aux = [];
+        $idSemana = 0;
+        $idRegion = 0;
+        $nombreRegion = "";
+        self::abrirConex();
+
+        $r = null;
+        $sentencia1 = "SELECT idSemana FROM Semana WHERE Semana = '" . $semana . "'";
+        if ($resultado1 = mysqli_query(self::$conexion, $sentencia1)) {
+            if ($fila1 = mysqli_fetch_array($resultado1)) {
+                $idSemana = $fila1["idSemana"];
+                $sentencia2 = "SELECT * FROM InfeccionSemanal WHERE idSemana = " . $idSemana;
+                if ($resultado2 = mysqli_query(self::$conexion, $sentencia2)) {
+                    while ($fila2 = mysqli_fetch_array($resultado2)) {
+                        $r = new Region();
+                        $r->setSemana($semana);
+                        $r->setNumInfectados($fila2['NumInfectados']);
+                        $r->setNumFallecidos($fila2['NumFallecidos']);
+                        $r->setNumAltas($fila2['NumAltas']);
+                        $r->setRegion($fila2['idRegion']);
+                        $aux[] = $r;
+                    }
+                }
+            }
+        }
+        self::cerrarConex();
+        return $aux;
+    }
+
+    public static function getNombreRegiones($regiones) {
+        self::abrirConex();
+
+        for ($i = 0; $i < sizeof($regiones); $i++) {
+            $r = $regiones[$i];
+            $sentencia = "SELECT Nombre FROM Region WHERE idRegion = " . $r->getRegion();
+            if ($resultado = mysqli_query(self::$conexion, $sentencia)) {
+                if ($fila = mysqli_fetch_array($resultado)) {
+                    $r->setRegion($fila['Nombre']);
+                }
+            }
+        }
+
+        self::cerrarConex();
+        return $regiones;
+    }
+
+    public static function getIdSemana($semana) {
+        self::abrirConex();
+
+        $sentencia = "SELECT idSemana FROM Semana WHERE Semana = '" . $semana . "'";
+
+        if ($resultado = mysqli_query(self::$conexion, $sentencia)) {
+            if ($fila = mysqli_fetch_array($resultado)) {
+                $idSemana = $fila['idSemana'];
+            }
+        }
+        self::cerrarConex();
+        return $idSemana;
+    }
+
+    public static function getIdRegion($region) {
+        self::abrirConex();
+
+        $sentencia = "SELECT idRegion FROM Region WHERE Nombre = '" . $region . "'";
+
+        if ($resultado = mysqli_query(self::$conexion, $sentencia)) {
+            if ($fila = mysqli_fetch_array($resultado)) {
+                $idRegion = $fila['idRegion'];
+            }
+        }
+
+        self::cerrarConex();
+        return $idRegion;
+    }
+
 }
